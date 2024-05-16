@@ -46,4 +46,18 @@ export class UserService {
       throw new NotFoundException();
     }
   }
+  async getUserInfo(email: string) {
+    try {
+      return await this.userRepository.getUserInfo(email);
+    } catch (error) {
+      throw new NotFoundException();
+    }
+  }
+  async isUser(email: string) {
+    try {
+      return await this.userRepository.isUser(email);
+    } catch (error) {
+      return error;
+    }
+  }
 }

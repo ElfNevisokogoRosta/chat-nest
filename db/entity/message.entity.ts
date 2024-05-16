@@ -10,6 +10,9 @@ export class Message {
   @ManyToOne(() => User, (user) => user.id)
   user: User;
 
+  @Column()
+  created_at: string;
+
   @Column({ default: null })
   text: string;
 

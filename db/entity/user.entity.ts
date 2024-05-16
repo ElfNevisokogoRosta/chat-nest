@@ -43,7 +43,4 @@ export class User {
   @ManyToMany(() => Chat, (chat) => chat.members)
   @JoinTable()
   participant_chat: Chat[];
-
-  // @ManyToOne(() => Contacts, (contacts) => contacts.contacts_list)
-  // contacts_list: Contacts;
 }

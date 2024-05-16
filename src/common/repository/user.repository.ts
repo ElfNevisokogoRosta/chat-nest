@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from 'db/entity';
 import { DataSource, Repository } from 'typeorm';
 
@@ -8,9 +12,9 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
   async createUser(user: Partial<User>) {
-    const isUser = await this.findOneByOrFail({ email: user.email });
-    if (isUser) return new Error();
-    return await this.save(user);
+    const isUser = await this.findOneBy({ email: user.email });
+    if (isUser) throw new ConflictException();
+    return this.save(user);
   }
   async getUser(id: number) {
     const user = await this.findOne({
@@ -29,5 +33,17 @@ export class UserRepository extends Repository<User> {
     const isUser = await this.findOneByOrFail({ id });
     if (!isUser) return new Error();
     return await this.delete(id);
+  }
+  async getUserInfo(email: string) {
+    const user = await this.findOne({ where: { email } });
+    if (!user) throw new NotFoundException();
+    return user;
+  }
+  async isUser(email: string) {
+    const isUser = await this.findOne({ where: { email } });
+    if (isUser === null) {
+      return false;
+    }
+    return true;
   }
 }
