@@ -31,14 +31,10 @@ export class AuthService {
       password: user.password,
     });
     const payload: JwtPayload = {
-      username: userData.username,
-      email: userData.email,
+      id: userData.id,
     };
     return {
       access_token: this.jwtService.sign(payload),
-      username: userData.username,
-      email: userData.email,
-      userId: userData.id,
     };
   }
 
@@ -54,12 +50,10 @@ export class AuthService {
       };
       const newUserData = await this.userRepository.createUser(newUser);
       const payload: JwtPayload = {
-        email: newUser?.email,
+        id: newUserData.id,
       };
-
       return {
         access_token: this.jwtService.sign(payload),
-        id: newUserData.id,
       };
     } catch (e) {
       throw new ConflictException();

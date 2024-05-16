@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -27,6 +28,7 @@ export class Chat {
   created_by: User;
 
   @ManyToMany(() => User, (user) => user.participant_chat)
+  @JoinTable()
   members: User[];
 
   @OneToMany(() => Message, (message) => message.chat)

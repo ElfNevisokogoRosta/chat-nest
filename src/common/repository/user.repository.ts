@@ -19,10 +19,12 @@ export class UserRepository extends Repository<User> {
   async getUser(id: number) {
     const user = await this.findOne({
       where: { id },
-      relations: ['contacts_list', 'admin_chats', 'participant_chat'],
+      relations: ['admin_chats', 'participant_chat'],
     });
     if (!user) return new Error();
-    return user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = user;
+    return rest;
   }
   async updateUser(id: number, user: Partial<User>) {
     const isUser = await this.findOneByOrFail({ id });

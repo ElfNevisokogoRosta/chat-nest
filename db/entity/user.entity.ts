@@ -1,10 +1,10 @@
 import {
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { Chat } from './chat.entity';
 

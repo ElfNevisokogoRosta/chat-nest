@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 const chatSchema = z.object({
   chat_name: z.string(),
-  admin: z.number(),
+  members: z.array(z.number()),
+  created_at: z.string(),
 });
 
 const createChat = chatSchema.required();
