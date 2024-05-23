@@ -7,8 +7,7 @@ export class ChatService {
   constructor(private readonly chatRepository: ChatRepository) {}
   async createChat(userId: number, chat: CreateChatDto) {
     try {
-      const chatData = { ...chat, created_at: Date.now().toString() };
-      return await this.chatRepository.createChat(userId, chatData);
+      return await this.chatRepository.createChat(userId, chat);
     } catch (error) {
       return error;
     }

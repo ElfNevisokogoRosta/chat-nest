@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 const chatSchema = z.object({
-  chat_name: z.string(),
+  chat_name: z.string().array(),
+  type: z.enum(['private', 'group']),
   members: z.array(z.number()),
   created_at: z.string(),
 });

@@ -1,52 +1,47 @@
+import { OnModuleInit } from '@nestjs/common';
 import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { MessageService } from '../../message/message.service';
+import { MessageRepository } from 'src/common/repository/message.repository';
 
-@WebSocketGateway()
-export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  constructor(private readonly messageService: MessageService) {}
-  private readonly logger = new Logger(ChatGateway.name);
+interface ChatBody {
+  created_at: string;
+  text?: string;
+  audio?: string;
+  image?: string;
+  chat_id: number;
+  user_id: number;
+}
+@WebSocketGateway(3232, {
+  cors: {
+    origin: '*',
+  },
+})
+export class ChatGateway implements OnModuleInit {
+  constructor(private readonly messageRepository: MessageRepository) {}
 
-  @WebSocketServer() io: Server;
+  @WebSocketServer()
+  server: Server;
 
-  async afterInit(server: any) {
-    this.logger.log(server);
-    // const { chatId, page } = server;
-    // const messages = await this.messageService.getAllMessages(+chatId, +page);
-    // this.io.emit('initialMessage', messages);
+  onModuleInit() {
+    this.server.on('connection', (socket) => {
+      console.log(socket.id);
+      console.log('Connected');
+    });
   }
 
-  handleConnection(client: any, ...args: any[]) {
-    console.log(args);
-    const { sockets } = this.io.sockets;
-
-    this.logger.log(`Client id: ${client.id} connected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
-  }
-
-  handleDisconnect(client: any) {
-    this.logger.log(`Client id:${client.id} disconnected`);
-  }
-  @SubscribeMessage('createMessage')
-  async createMessage(client: any, data: any) {
-    const { userId, message } = data;
-    const createdMessage = await this.messageService.createMessage(
-      userId,
-      message,
+  @SubscribeMessage('newMessage')
+  async onNewMessage(@MessageBody() body: ChatBody) {
+    const { chat_id, user_id, ...rest } = body;
+    const newMessage = await this.messageRepository.createMessage(
+      user_id,
+      chat_id,
+      rest,
     );
-    return {
-      event: 'messageCreated',
-      data: createdMessage,
-    };
+    this.server.emit('onMessage', newMessage);
   }
 }

@@ -37,6 +37,10 @@ export class User {
   @Column()
   last_time_active: string;
 
+  @ManyToMany(() => User)
+  @JoinTable()
+  friends: User[];
+
   @OneToMany(() => Chat, (chat) => chat.created_by)
   admin_chats: Chat[];
 

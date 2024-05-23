@@ -15,8 +15,11 @@ export class Chat {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  chat_name: string;
+  @Column('simple-array')
+  chat_name: string[];
+
+  @Column({ default: 'private' })
+  type: 'private' | 'group';
 
   @Column()
   created_at: string;
@@ -31,6 +34,6 @@ export class Chat {
   @JoinTable()
   members: User[];
 
-  @OneToMany(() => Message, (message) => message.chat)
+  @OneToMany(() => Message, (message) => message.chat, { cascade: true })
   messages: Message[];
 }

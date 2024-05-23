@@ -15,7 +15,6 @@ export class ChatRepository extends Repository<Chat> {
     if (!user) throw new NotFoundException('User not found');
 
     const newChat = new Chat();
-    newChat.chat_name = chat.chat_name;
     newChat.created_at = chat.created_at;
     newChat.archived = false;
     newChat.created_by = user;
@@ -30,17 +29,30 @@ export class ChatRepository extends Repository<Chat> {
         return member;
       }),
     );
-    newChat.members = memberEntities;
+    if (chat.members.length > 2) {
+      newChat.chat_name = chat.chat_name;
+      newChat.type = 'group';
+    } else {
+      newChat.chat_name = [user.username, memberEntities[0].username];
+      newChat.type = 'private';
+    }
+    newChat.members = [...memberEntities, user];
     return await this.save(newChat);
   }
+
   async getChat(id: number) {
-    const chat = await this.findOne({
-      where: { id },
-      relations: ['members', 'messages', 'created_by'],
-    });
-    if (!chat) return new NotFoundException('Chat with that id not foudn');
+    const chat = await this.createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.members', 'members')
+      .leftJoinAndSelect('chat.messages', 'messages')
+      .leftJoinAndSelect('messages.user', 'messageUser')
+      .leftJoinAndSelect('chat.created_by', 'createdBy')
+      .where('chat.id = :id', { id })
+      .getOne();
+
+    if (!chat) throw new NotFoundException('Chat with that id not found');
     return chat;
   }
+
   async updateChat(userId: number, chatId: number, chat: Partial<Chat>) {
     const user = await this.dataSource.manager.findOne(User, {
       where: { id: userId },

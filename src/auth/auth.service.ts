@@ -10,12 +10,26 @@ import { IUser } from 'src/common/types/iUser';
 import { CreateUserDto } from 'src/common/schema/user.schema';
 import { UserRepository } from '../common/repository/user.repository';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
 @Injectable()
 export class AuthService {
+  private readonly JWTTTL: string;
+  private readonly RefreshJWTTTL: string;
+  private readonly JWTSecret: string;
+  private readonly RefreshJWThSecret: string;
+
   constructor(
     private readonly userRepository: UserRepository,
     private jwtService: JwtService,
-  ) {}
+  ) {
+    this.JWTTTL = process.env.EXPIRE_IN;
+    this.RefreshJWTTTL = process.env.REFRESH_EXPIRE_IN;
+    this.JWTSecret = process.env.JWT_SECRET;
+    this.RefreshJWThSecret = process.env.JWT_SECRET_REFRESH;
+  }
+
   async validateUser({ email, password }: { email: string; password: string }) {
     const user = await this.userRepository.getUserInfo(email);
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -23,8 +37,9 @@ export class AuthService {
       const { password, ...result } = user;
       return result;
     }
-    throw new BadRequestException('Something wrong');
+    throw new BadRequestException('Invalid credentials');
   }
+
   async signIn(user: IUser) {
     const userData = await this.validateUser({
       email: user.email,
@@ -34,7 +49,14 @@ export class AuthService {
       id: userData.id,
     };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {
+        expiresIn: this.JWTTTL,
+        secret: this.JWTSecret,
+      }),
+      refresh_token: this.jwtService.sign(payload, {
+        expiresIn: this.RefreshJWTTTL,
+        secret: this.RefreshJWThSecret,
+      }),
     };
   }
 
@@ -53,10 +75,33 @@ export class AuthService {
         id: newUserData.id,
       };
       return {
-        access_token: this.jwtService.sign(payload),
+        access_token: this.jwtService.sign(payload, {
+          expiresIn: this.JWTTTL,
+          secret: this.JWTSecret,
+        }),
+        refresh_token: this.jwtService.sign(payload, {
+          expiresIn: this.RefreshJWTTTL,
+          secret: this.RefreshJWThSecret,
+        }),
       };
     } catch (e) {
-      throw new ConflictException();
+      throw new ConflictException('User already exists');
     }
+  }
+
+  async refreshToken(user: IUser) {
+    const payload: JwtPayload = {
+      id: user.id,
+    };
+    return {
+      access_token: this.jwtService.sign(payload, {
+        expiresIn: this.JWTTTL,
+        secret: this.JWTSecret,
+      }),
+      refresh_token: this.jwtService.sign(payload, {
+        expiresIn: this.RefreshJWTTTL,
+        secret: this.RefreshJWThSecret,
+      }),
+    };
   }
 }

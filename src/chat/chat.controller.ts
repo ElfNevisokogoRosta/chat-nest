@@ -26,7 +26,6 @@ export class ChatController {
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
   async getChatInfo(@Param('id') id: string) {
-    console.log(id);
     return await this.chatService.getChat(+id);
   }
 

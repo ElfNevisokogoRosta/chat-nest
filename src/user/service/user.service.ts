@@ -1,28 +1,10 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from 'src/common/repository/user.repository';
-import { CreateUserDto, UpdateUserDto } from 'src/common/schema/user.schema';
+import { UpdateUserDto } from 'src/common/schema/user.schema';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
-
-  async createUser(user: CreateUserDto) {
-    try {
-      const userData = {
-        ...user,
-        created_at: Date.now().toString(),
-        online: true,
-        last_time_active: Date.now().toString(),
-      };
-      return await this.userRepository.createUser(userData);
-    } catch (error) {
-      throw new ConflictException();
-    }
-  }
 
   async getUser(id: number) {
     try {
@@ -39,6 +21,7 @@ export class UserService {
       throw new NotFoundException();
     }
   }
+
   async deleteUser(id: number) {
     try {
       return await this.userRepository.deleteUser(id);
@@ -46,16 +29,18 @@ export class UserService {
       throw new NotFoundException();
     }
   }
-  async getUserInfo(email: string) {
+
+  async addFriends(friends: number[], user_id: number) {
     try {
-      return await this.userRepository.getUserInfo(email);
-    } catch (error) {
-      throw new NotFoundException();
+      return await this.userRepository.addFriends(friends, user_id);
+    } catch (e) {
+      throw e;
     }
   }
-  async isUser(email: string) {
+
+  async getUsersByUsername(username: string) {
     try {
-      return await this.userRepository.isUser(email);
+      return await this.userRepository.findUsers(username);
     } catch (error) {
       return error;
     }

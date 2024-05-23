@@ -22,7 +22,8 @@ export class MessageRepository extends Repository<Message> {
     });
     if (!user) return new Error();
     if (!chat) return new Error();
-    return await this.save({ ...message, chat, user });
+    const newMessage = await this.save({ ...message, chat, user });
+    return newMessage;
   }
 
   async updateMessage(

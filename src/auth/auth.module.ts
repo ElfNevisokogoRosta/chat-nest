@@ -6,6 +6,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UserRepository } from '../common/repository/user.repository';
+import { JwtRefreshStrategy } from './strategies/jwtRefres.strategy';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
@@ -19,7 +20,13 @@ require('dotenv').config();
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, UserRepository],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    UserRepository,
+    JwtRefreshStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
