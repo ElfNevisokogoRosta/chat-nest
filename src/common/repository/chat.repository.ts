@@ -29,7 +29,7 @@ export class ChatRepository extends Repository<Chat> {
         return member;
       }),
     );
-    if (chat.members.length > 2) {
+    if (chat.chat_name) {
       newChat.chat_name = chat.chat_name;
       newChat.type = 'group';
     } else {

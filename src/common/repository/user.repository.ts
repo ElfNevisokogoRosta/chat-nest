@@ -71,7 +71,6 @@ export class UserRepository extends Repository<User> {
     );
 
     const existingFriendIds = new Set(user.friends.map((friend) => friend.id));
-
     const newFriends = friendsToAdd.filter(
       (friend) => !existingFriendIds.has(friend.id),
     );
@@ -89,9 +88,7 @@ export class UserRepository extends Repository<User> {
       return chat;
     });
     await this.dataSource.getRepository(Chat).save(newChats);
-
     await this.save(user);
-
     return user;
   }
 
